@@ -1,0 +1,14 @@
+session_id,tracker_id,jersey_number,display_name,tracked_frames,risk_score,risk_band,main_finding
+ses_db888e9eeaca,1,N/A,Player 01,116,45,HIGH,Elevated Dynamic Knee Valgus Proxy
+ses_db888e9eeaca,2,7,Player #7,18,45,HIGH,Elevated Dynamic Knee Valgus Proxy
+ses_db888e9eeaca,3,23,Player #23,3,88,LOW,Normal Movement Mechanics
+ses_db888e9eeaca,4,N/A,Player 04,27,88,LOW,Normal Movement Mechanics
+ses_db888e9eeaca,5,7,Player #7,6,88,LOW,Normal Movement Mechanics
+ses_db888e9eeaca,6,23,Player #23,5,88,LOW,Normal Movement Mechanics
+ses_db888e9eeaca,7,N/A,Player 07,1,88,LOW,Normal Movement Mechanics
+ses_db888e9eeaca,8,N/A,Player 08,1,88,LOW,Normal Movement Mechanics
+ses_db888e9eeaca,9,N/A,Player 09,2,88,LOW,Normal Movement Mechanics
+ses_db888e9eeaca,10,N/A,Player 010,1,88,LOW,Normal Movement Mechanics
+ses_db888e9eeaca,11,N/A,Player 011,1,45,HIGH,Elevated Dynamic Knee Valgus Proxy
+ses_db888e9eeaca,12,N/A,Player 012,1,45,HIGH,Elevated Dynamic Knee Valgus Proxy
+ses_db888e9eeaca,13,N/A,Player 013,1,88,LOW,Normal Movement Mechanics

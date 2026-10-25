@@ -1,0 +1,30 @@
+session_id,tracker_id,jersey_number,display_name,tracked_frames,risk_score,risk_band,main_finding
+ses_3a7cb7dc63da,1,7,Player #7,205,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,2,7,Player #7,88,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,3,7,Player #7,121,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,4,7,Player #7,49,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,5,7,Player #7,129,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,6,7,Player #7,7,45,HIGH,Elevated Dynamic Knee Valgus Proxy
+ses_3a7cb7dc63da,7,7,Player #7,76,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,8,7,Player #7,28,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,9,23,Player #23,50,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,10,7,Player #7,31,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,11,23,Player #23,71,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,12,7,Player #7,30,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,13,23,Player #23,36,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,14,7,Player #7,8,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,15,N/A,Player 015,23,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,16,7,Player #7,42,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,17,7,Player #7,15,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,18,7,Player #7,13,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,19,7,Player #7,8,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,20,7,Player #7,7,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,21,N/A,Player 021,2,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,22,7,Player #7,6,45,HIGH,Elevated Dynamic Knee Valgus Proxy
+ses_3a7cb7dc63da,23,7,Player #7,2,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,24,7,Player #7,28,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,25,7,Player #7,26,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,26,7,Player #7,4,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,27,7,Player #7,5,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,28,N/A,Player 028,2,88,LOW,Normal Movement Mechanics
+ses_3a7cb7dc63da,29,N/A,Player 029,2,88,LOW,Normal Movement Mechanics

@@ -1,0 +1,3 @@
+session_id,tracker_id,jersey_number,display_name,tracked_frames,risk_score,risk_band,main_finding
+ses_45caf4d23ce8,1,N/A,Player 01,30,88,LOW,Normal Movement Mechanics
+ses_45caf4d23ce8,2,N/A,Player 02,30,88,LOW,Normal Movement Mechanics

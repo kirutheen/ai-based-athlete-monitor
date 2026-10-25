@@ -1,0 +1,6 @@
+session_id,event_id,player_ids,player_names,frame_number,timestamp_s,severity,iou_overlap,relative_velocity,summary
+ses_69b26eb5aba0,col_41779a4d,"1,3","Player #7,Player 03",76,2.533,MEDIUM,0.102,0.0,Player Collision detected between Player #7 and Player 03 (IoU: 0.10).
+ses_69b26eb5aba0,col_f71c9d93,"2,3","Player 02,Player 03",76,2.533,MEDIUM,0.14,0.0,Player Collision detected between Player 02 and Player 03 (IoU: 0.14).
+ses_69b26eb5aba0,col_4fa538e1,"2,3","Player 02,Player #7",106,3.533,MEDIUM,0.154,0.23,Player Collision detected between Player 02 and Player #7 (IoU: 0.15).
+ses_69b26eb5aba0,col_bd645f8d,"1,4","Player #7,Player 04",117,3.9,MEDIUM,0.0,0.0,Player Collision detected between Player #7 and Player 04 (IoU: 0.00).
+ses_69b26eb5aba0,col_da189402,"3,4","Player #7,Player 04",117,3.9,HIGH,0.271,0.0,Player Collision detected between Player #7 and Player 04 (IoU: 0.27).

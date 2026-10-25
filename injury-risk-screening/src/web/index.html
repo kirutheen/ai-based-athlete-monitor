@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DriftGuard | Clinical Biomechanical Risk Screening System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="recovery.css">
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+            <path d="M12 11.5V17"/>
+            <circle cx="12" cy="17" r="1.5"/>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>DriftGuard <span class="badge-clinical">Clinical</span></h1>
+          <p class="brand-subtitle">Biomechanical Knee Risk Screening Platform</p>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <button class="nav-btn active" data-view="dashboard">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 2 0 0 1-2 2H5a2 2 2 0 0 1-2-2z"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-btn" data-view="athletes">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          Athletes
+        </button>
+        <button class="nav-btn" data-view="screening">
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          Screening Wizard
+        </button>
+        <button class="nav-btn" data-view="queue">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Review Queue <span class="badge-count" id="nav-queue-count">0</span>
+        </button>
+        <button class="nav-btn" data-view="recovery">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Recovery Module
+        </button>
+      </nav>
+
+      <div class="header-status">
+        <div class="status-indicator">
+          <span class="status-dot online"></span>
+          <span>FastAPI Engine Ready</span>
+        </div>
+        <div class="disclaimer-badge" title="Non-Diagnostic Screening Aid">
+          <span>Non-Diagnostic Screening Aid</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <!-- DASHBOARD VIEW -->
+      <section id="view-dashboard" class="view-section active">
+        <div class="section-header">
+          <div>
+            <h2>Clinician Summary Dashboard</h2>
+            <p class="section-desc">Overview of athlete assessments, unreviewed risk flags, and screening status.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-secondary" onclick="switchView('recovery')">&#x1F3E5; Recovery Module</button>
+            <button class="btn btn-primary" onclick="switchView('screening')">+ New Screening Session</button>
+          </div>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-title">Active Athletes</div>
+            <div class="kpi-value" id="kpi-athletes-count">--</div>
+            <div class="kpi-sub">Registered for monitoring</div>
+          </div>
+          <div class="kpi-card warning">
+            <div class="kpi-title">Pending Clinical Reviews</div>
+            <div class="kpi-value" id="kpi-unreviewed-count">--</div>
+            <div class="kpi-sub">Moderate / High risk flags</div>
+          </div>
+          <div class="kpi-card danger">
+            <div class="kpi-title">High Risk Deviations</div>
+            <div class="kpi-value" id="kpi-high-risk-count">--</div>
+            <div class="kpi-sub">Require clinician review</div>
+          </div>
+          <div class="kpi-card success">
+            <div class="kpi-title">Baselines Established</div>
+            <div class="kpi-value" id="kpi-baselines-count">--</div>
+            <div class="kpi-sub">Robust Median/MAD profiles</div>
+          </div>
+        </div>
+
+        <!-- Dashboard Two-Column Grid -->
+        <div class="dashboard-grid">
+          <!-- Unreviewed Flag Queue -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Requires Clinical Review</h3>
+              <span class="badge badge-warning">Action Required</span>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Athlete</th>
+                    <th>Biomechanical Feature</th>
+                    <th>Observed Band</th>
+                    <th>Deviation (IQR)</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="table-dashboard-flags">
+                  <tr><td colspan="5" class="empty-state">Loading risk queue...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick Sports Profiles -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Sport Biomechanical Architectures</h3>
+            </div>
+            <div class="sports-list" id="dashboard-sports-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ATHLETES DIRECTORY & PROFILE VIEW -->
+      <section id="view-athletes" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2>Athlete Directory & Biomechanical Profiles</h2>
+            <p class="section-desc">View athlete baseline profiles, longitudinal trends, and screening session history.</p>
+          </div>
+          <button class="btn btn-secondary" onclick="openNewAthleteModal()">+ Register Athlete</button>
+        </div>
+
+        <div class="athlete-layout">
+          <!-- Left: Athlete Search & List -->
+          <div class="card athlete-sidebar">
+            <div class="search-box">
+              <input type="text" id="athlete-search-input" placeholder="Search athlete by name..." oninput="filterAthletes()">
+            </div>
+            <div class="athlete-list" id="athlete-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Right: Athlete 7-Tab Detail Workspace -->
+          <div class="card athlete-workspace" id="athlete-workspace">
+            <div class="empty-workspace-state" id="athlete-empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+              </svg>
+              <h3>Select an athlete from the directory</h3>
+              <p>Choose an athlete to inspect baselines, movement history, and risk trends.</p>
+            </div>
+
+            <div id="athlete-detail-container" style="display: none;">
+              <!-- Athlete Detail Header -->
+              <div class="athlete-header-bar">
+                <div class="athlete-profile-info">
+                  <h3 id="ath-detail-name">Athlete Name</h3>
+                  <div class="ath-meta-tags">
+                    <span class="badge" id="ath-detail-sport">Sport</span>
+                    <span class="badge badge-outline" id="ath-detail-leg">Dominant Leg</span>
+                    <span class="badge badge-outline" id="ath-detail-team">Team/School</span>
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="startScreeningForCurrentAthlete()">New Screening</button>
+              </div>
+
+              <!-- 7-Tab Navigation -->
+              <div class="tabs-nav">
+                <button class="tab-btn active" onclick="switchAthTab('overview')">Overview</button>
+                <button class="tab-btn" onclick="switchAthTab('baseline')">Baseline Profile</button>
+                <button class="tab-btn" onclick="switchAthTab('history')">Event History</button>
+                <button class="tab-btn" onclick="switchAthTab('biomechanics-trends')">Biomechanics Trends</button>
+                <button class="tab-btn" onclick="switchAthTab('risk-trends')">Risk Trends</button>
+                <button class="tab-btn" onclick="switchAthTab('sessions')">Sessions</button>
+                <button class="tab-btn" onclick="switchAthTab('reports')">Reports & Clearances</button>
+              </div>
+
+              <!-- Tab 1: Overview -->
+              <div id="ath-tab-overview" class="ath-tab-pane active">
+                <div class="grid-2col">
+                  <div class="info-card">
+                    <h4>Clinical Profile Details</h4>
+                    <ul class="info-list">
+                      <li><strong>Athlete ID:</strong> <span id="ath-info-id">--</span></li>
+                      <li><strong>Sport Profile:</strong> <span id="ath-info-sport">--</span></li>
+                      <li><strong>Dominant Leg:</strong> <span id="ath-info-leg">--</span></li>
+                      <li><strong>Team / Institution:</strong> <span id="ath-info-team">--</span></li>
+                      <li><strong>Consent On File:</strong> <span class="badge badge-success">Verified</span></li>
+                    </ul>
+                  </div>
+                  <div class="info-card">
+                    <h4>Baseline Readiness</h4>
+                    <p id="ath-baseline-status-text">Loading baseline info...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 2: Baseline Profile -->
+              <div id="ath-tab-baseline" class="ath-tab-pane">
+                <h4>Established Personal Biomechanical Baseline</h4>
+                <p class="tab-desc">Median and Median Absolute Deviation (MAD / IQR) across prior uninjured trials.</p>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Feature Name</th>
+                      <th>Events Count</th>
+                      <th>Status</th>
+                      <th>Baseline Median</th>
+                      <th>Interquartile Range (IQR)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-athlete-baselines">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Tab 3: History -->
+              <div id="ath-tab-history" class="ath-tab-pane">
+                <h4>Landings & Kinematics History</h4>
+                <div class="table-container">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Event ID</th>
+                        <th>Timestamp (s)</th>
+                        <th>Knee Flex (L/R)</th>
+                        <th>FPPA Valgus (L/R)</th>
+                        <th>Knee Flex LSI</th>
+                        <th>Valgus LSI</th>
+                        <th>Pose Quality</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-athlete-events">
+                      <!-- Populated by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Tab 4: Biomechanics Trends -->
+              <div id="ath-tab-biomechanics-trends" class="ath-tab-pane">
+                <h4>Longitudinal Biomechanical Trends</h4>
+                <div class="trend-cards-grid" id="ath-trend-metrics">
+                  <!-- JS metric trend bars -->
+                </div>
+              </div>
+
+              <!-- Tab 5: Risk Trends -->
+              <div id="ath-tab-risk-trends" class="ath-tab-pane">
+                <h4>Longitudinal Risk Classification Trends</h4>
+                <div class="table-container">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Flag ID</th>
+                        <th>Feature</th>
+                        <th>Observed Band</th>
+                        <th>Deviation</th>
+                        <th>Clinical Detail</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-athlete-flags">
+                      <!-- Populated by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Tab 6: Sessions -->
+              <div id="ath-tab-sessions" class="ath-tab-pane">
+                <h4>Assessment Sessions Log</h4>
+                <div class="table-container">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Session ID</th>
+                        <th>Recorded At</th>
+                        <th>Camera Setup</th>
+                        <th>FPS</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-athlete-sessions">
+                      <!-- Populated by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Tab 7: Reports -->
+              <div id="ath-tab-reports" class="ath-tab-pane">
+                <h4>Clinical Session Reports</h4>
+                <div id="ath-reports-list">
+                  <p class="empty-state">Select a session to generate or view report.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREENING WIZARD & SYNCHRONIZED PLAYER VIEW -->
+      <section id="view-screening" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2>Screening Assessment Wizard</h2>
+            <p class="section-desc">Guided biomechanical assessment pipeline with automated pose tracking & synchronized player.</p>
+          </div>
+        </div>
+
+        <!-- Step Wizard Progress Bar -->
+        <div class="wizard-steps">
+          <div class="wizard-step active" id="wiz-step-1-btn">
+            <div class="step-num">1</div>
+            <div class="step-label">Select Athlete & Sport</div>
+          </div>
+          <div class="wizard-step" id="wiz-step-2-btn">
+            <div class="step-num">2</div>
+            <div class="step-label">Video Quality Check</div>
+          </div>
+          <div class="wizard-step" id="wiz-step-3-btn">
+            <div class="step-num">3</div>
+            <div class="step-label">Biomechanical Engine</div>
+          </div>
+          <div class="wizard-step" id="wiz-step-4-btn">
+            <div class="step-num">4</div>
+            <div class="step-label">Synchronized Analysis</div>
+          </div>
+        </div>
+
+        <!-- Wizard Step 1 Form -->
+        <div class="card wizard-content-pane active" id="wiz-pane-1">
+          <h3>Step 1: Athlete & Sport Context</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Select Registered Athlete</label>
+              <select id="wiz-athlete-select" class="form-control">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Sport Profile Architecture</label>
+              <select id="wiz-sport-select" class="form-control">
+                <option value="basketball">Basketball</option>
+                <option value="football">Football / Soccer</option>
+                <option value="cricket">Cricket</option>
+                <option value="volleyball">Volleyball</option>
+                <option value="tennis">Tennis</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Camera Setup Configuration</label>
+              <select id="wiz-camera-select" class="form-control">
+                <option value="frontal+sagittal">Dual-Camera Frontal + Sagittal (Recommended)</option>
+                <option value="frontal">Monocular Frontal View</option>
+                <option value="sagittal">Monocular Sagittal View</option>
+              </select>
+            </div>
+          </div>
+          <div class="wizard-actions">
+            <button class="btn btn-primary" onclick="goToWizStep(2)">Proceed to Video Validation &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Wizard Step 2 Video Inspector & Live Webcam -->
+        <div class="card wizard-content-pane" id="wiz-pane-2">
+          <div class="mode-toggle-bar">
+            <button class="btn btn-secondary btn-sm active" id="btn-mode-file" onclick="switchVideoSourceMode('file')">Pre-Recorded Video File</button>
+            <button class="btn btn-secondary btn-sm" id="btn-mode-webcam" onclick="switchVideoSourceMode('webcam')">Live Real-Time Webcam (Iriun / USB Cam)</button>
+          </div>
+
+          <!-- Mode A: Pre-recorded Video File -->
+          <div id="source-mode-file">
+            <h3>Step 2: Video File Quality Inspection</h3>
+            <p class="pane-desc">Upload trial recording. Automated validator inspects resolution, frame rate, and joint visibility before pose tracking.</p>
+            
+            <div class="upload-zone" onclick="document.getElementById('video-file-input').click()">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <h4>Click to upload trial video (MP4 / MOV / AVI)</h4>
+              <p class="upload-hint">Or click 'Use Sample Video Trial' for immediate demo analysis.</p>
+              <input type="file" id="video-file-input" style="display: none;" accept="video/*" onchange="handleVideoFileSelected(event)">
+            </div>
+
+            <div class="sample-demo-bar">
+              <span>Don't have a video file ready?</span>
+              <button class="btn btn-secondary btn-sm" onclick="useDemoVideoFile()">Use Sample High-Speed Drop Jump Recording</button>
+            </div>
+
+            <!-- Video Quality Inspector Card -->
+            <div class="quality-results-card" id="quality-results-card" style="display: none;">
+              <h4>Video Quality Inspection Report</h4>
+              <div class="quality-metrics-grid">
+                <div class="q-metric"><span>Resolution:</span> <strong id="q-res">1280x720</strong></div>
+                <div class="q-metric"><span>Frame Rate:</span> <strong id="q-fps">30.0 FPS</strong></div>
+                <div class="q-metric"><span>Duration:</span> <strong id="q-dur">10.0 sec</strong></div>
+                <div class="q-metric"><span>Landmark Visibility:</span> <strong class="text-success" id="q-vis">100% Lower Limb</strong></div>
+              </div>
+              <div class="q-feedback-text text-success" id="q-feedback">
+                Video quality validated successfully. Ready for biomechanical screening.
+              </div>
+            </div>
+          </div>
+
+          <!-- Mode B: Live Real-Time Webcam Stream -->
+          <div id="source-mode-webcam" style="display: none;">
+            <h3>Real-Time Live Webcam Biomechanical Monitoring</h3>
+            <p class="pane-desc">Connect Iriun Webcam or USB camera for live frame-by-frame joint angle, valgus proxy, and rotation tracking.</p>
+
+            <div class="form-group margin-bottom">
+              <label>Select Camera Input Device (Iriun Webcam / System Cam)</label>
+              <select id="webcam-device-select" class="form-control">
+                <option value="">Default System Webcam</option>
+              </select>
+            </div>
+
+            <div class="webcam-workspace">
+              <!-- Live Video & Skeleton Overlay Canvas -->
+              <div class="live-canvas-box">
+                <video id="live-webcam-feed" autoplay playsinline muted style="display: none;"></video>
+                <canvas id="live-webcam-overlay" width="640" height="360"></canvas>
+                <div class="live-overlay-tag" id="webcam-status-tag">Camera Offline</div>
+              </div>
+
+              <!-- Live Real-Time Gauges -->
+              <div class="live-gauges-panel">
+                <h4>Live Kinematic Measures</h4>
+                
+                <div class="gauge-card-small">
+                  <span>Knee Flexion (Left / Right)</span>
+                  <div class="gauge-num" id="live-g-flex">--Â° / --Â°</div>
+                </div>
+
+                <div class="gauge-card-small">
+                  <span>FPPA Valgus Proxy (Left / Right)</span>
+                  <div class="gauge-num" id="live-g-fppa">--Â° / --Â°</div>
+                </div>
+
+                <div class="gauge-card-small">
+                  <span>Hip Abduction Angle</span>
+                  <div class="gauge-num" id="live-g-hip">--Â°</div>
+                </div>
+
+                <div class="gauge-card-small">
+                  <span>Live Limb Symmetry Index (LSI)</span>
+                  <div class="gauge-num text-success" id="live-g-lsi">--%</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="webcam-controls-bar">
+              <button class="btn btn-secondary" onclick="startLiveWebcamStream()">Start Camera Stream</button>
+              <button class="btn btn-secondary" onclick="stopLiveWebcamStream()">Stop Camera</button>
+              <button class="btn btn-success" id="btn-record-live" onclick="startChunkedWebcamRecording()" disabled>Start 5-Min (300s) Monitoring Recording</button>
+              <button class="btn btn-danger" id="btn-stop-record-live" onclick="stopChunkedWebcamRecording()" style="display: none;">Stop &amp; Analyze</button>
+              <span id="recording-timer" class="badge badge-outline" style="display: none;">00:00 / 05:00</span>
+              <span id="recording-chunk-status" style="font-size: 0.8rem; color: var(--color-text-muted); display: none;"></span>
+            </div>
+          </div>
+
+          <div class="wizard-actions">
+            <button class="btn btn-secondary" onclick="goToWizStep(1)">&larr; Back</button>
+            <button class="btn btn-primary" id="btn-start-pipeline" onclick="startBiomechanicalProcessing()" disabled>Start Biomechanical Pipeline &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Wizard Step 3 Real-Time Progress -->
+        <div class="card wizard-content-pane" id="wiz-pane-3">
+          <h3>Step 3: Biomechanical Feature Extraction Engine</h3>
+          <p class="pane-desc">Processing pose landmarks, computing Level 1/2 joint kinematics, LSI, and personal baseline deviation.</p>
+
+          <div class="progress-box">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="pipeline-progress-bar" style="width: 0%;"></div>
+            </div>
+            <div class="progress-status-text" id="pipeline-status-text">Initializing pipeline...</div>
+          </div>
+
+          <div class="steps-breakdown">
+            <div class="pipeline-step-item" id="pipe-step-1">
+              <span class="step-status-icon">âœ“</span>
+              <span>1. Landmark Tracking (2D/3D MediaPipe Kinematic Pose)</span>
+            </div>
+            <div class="pipeline-step-item" id="pipe-step-2">
+              <span class="step-status-icon">âœ“</span>
+              <span>2. Landing Event Segmentation (Initial Contact, Peak Flexion)</span>
+            </div>
+            <div class="pipeline-step-item" id="pipe-step-3">
+              <span class="step-status-icon">âœ“</span>
+              <span>3. Level 1 & Level 2 Biomechanical Feature Computation (FPPA, Flexion, LSI, Valgus Duration)</span>
+            </div>
+            <div class="pipeline-step-item" id="pipe-step-4">
+              <span class="step-status-icon">âœ“</span>
+              <span>4. Baseline Comparison & Evidence-Based Risk Banding</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wizard Step 4 Synchronized Player & Results -->
+        <div class="wizard-content-pane" id="wiz-pane-4">
+          <div class="synchronized-workspace">
+            <!-- Left: Synchronized Video & Skeleton Canvas -->
+            <div class="card player-card">
+              <div class="player-header">
+                <div>
+                  <h3>Synchronized Video & Kinematic Skeleton</h3>
+                  <div class="view-mode-tabs" style="display: flex; gap: 8px; margin-top: 6px;">
+                    <button class="btn btn-secondary btn-sm active" id="btn-view-single" onclick="setTrackingViewMode('single')">Single-Athlete View</button>
+                    <button class="btn btn-secondary btn-sm" id="btn-view-multiplayer" onclick="setTrackingViewMode('multiplayer')">Multi-Player Tracking Tab</button>
+                    <button class="btn btn-secondary btn-sm" id="btn-view-multiathlete" onclick="setTrackingViewMode('multiAthlete')">Multi-Athlete (ID-Stable)</button>
+                  </div>
+                </div>
+                <span class="badge badge-outline" id="player-time-display">0.00s / 4.00s (Frame 0)</span>
+              </div>
+
+              <!-- Multi-Player Side Tab / Control Panel -->
+              <div id="multiplayer-side-tab" class="multiplayer-side-tab" style="display: none;">
+                <div class="mp-tab-header">
+                  <h4>Multi-Player Tracking Panel</h4>
+                  <span class="badge badge-primary" id="mp-active-badge">Active Tracking</span>
+                </div>
+                <div class="mp-target-row">
+                  <label for="mp-target-select"><strong>Target Athlete Highlight:</strong></label>
+                  <select id="mp-target-select" class="form-control" style="max-width: 260px;" onchange="setTargetAthleteId(this.value)">
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+                <div class="mp-players-container" id="mp-players-container">
+                  <!-- Player Chips populated dynamically -->
+                </div>
+                <div class="mp-info-banner">
+                  <div><span class="mp-dot gold"></span> <strong>Target Athlete:</strong> Highlighted in amber-gold for whole playback. Biomechanical gauges & risk assessment stay isolated to this athlete.</div>
+                  <div><span class="mp-dot cyan"></span> <strong>Other Players:</strong> Rendered in non-target styling with independent skeletons.</div>
+                </div>
+              </div>
+
+              <!-- Multi-Athlete Side Panel (stable per-athlete ID, independent biomechanics) -->
+              <div id="multiathlete-side-tab" class="multiplayer-side-tab" style="display: none;">
+                <div class="mp-tab-header">
+                  <h4>Multi-Athlete Panel</h4>
+                  <span class="badge badge-primary" id="ma-active-badge">Loadingâ€¦</span>
+                </div>
+                <div id="ma-athletes-container" class="mp-players-container">
+                  <p class="mp-empty-state">Load a session to detect athletes.</p>
+                </div>
+                <div class="mp-info-banner">
+                  <div>Each athlete has a unique color from their stable tracking ID. Biomechanics are calculated independently â€” no cross-contamination.</div>
+                </div>
+              </div>
+
+              <div class="canvas-container" id="player-canvas-container">
+                <!-- Background Video -->
+                <video id="player-video" playsinline muted preload="auto"></video>
+                <!-- Transparent overlay canvas for kinematic joint skeleton -->
+                <canvas id="skeleton-canvas"></canvas>
+                <div class="canvas-placeholder-overlay">
+                  <div class="skeleton-legend">
+                    <span class="legend-item" id="legend-left-limb"><span class="dot green"></span> Left Limb</span>
+                    <span class="legend-item" id="legend-right-limb"><span class="dot blue"></span> Right Limb</span>
+                    <span class="legend-item" id="legend-valgus"><span class="dot red"></span> Valgus Deviation</span>
+                    <span class="legend-item mp-only-legend" id="legend-mp-target" style="display: none;"><span class="dot gold"></span> Target Athlete</span>
+                    <span class="legend-item mp-only-legend" id="legend-mp-peer" style="display: none;"><span class="dot cyan"></span> Peer Players</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Interactive Timeline & Controls -->
+
+              <!-- Legacy data warning: shown by app.js when session has fabricated Level 2 values -->
+              <div id="legacy-data-banner" style="display:none;margin:6px 0;padding:8px 14px;background:rgba(239,68,68,0.12);border-left:3px solid #EF4444;border-radius:4px;font-size:0.8rem;color:#7F1D1D;cursor:help;">
+                &#9888; <strong>Legacy session data detected.</strong> This session contains Level 2 kinematic values generated by the old fabrication pipeline (computed from 2D landmarks). Do not use clinically. Re-process to obtain honest null values.
+              </div>
+
+              <div class="player-controls">
+
+                <button class="btn btn-secondary btn-sm" id="btn-play-pause" onclick="togglePlayerPlay()">Play Trial</button>
+                <input type="range" id="player-scrubber" min="0" max="119" value="0" class="scrubber" oninput="scrubPlayer(this.value)">
+              </div>
+
+              <div class="timeline-events-bar">
+                <span class="timeline-title">Event Keyframes:</span>
+                <button class="btn-event-tag" onclick="jumpToFrame(45)">Event #1: Rebound Landing (1.50s)</button>
+                <button class="btn-event-tag" onclick="jumpToFrame(105)">Event #2: Cut Landing (3.50s)</button>
+              </div>
+            </div>
+
+            <!-- Right: Real-time Biomechanical Gauges -->
+            <div class="card gauges-card">
+              <h3>Observed Kinematic Gauges</h3>
+              
+              <div class="gauge-grid">
+                <div class="gauge-item">
+                  <div class="gauge-title">FPPA Valgus Proxy (Left)</div>
+                  <div class="gauge-value warning" id="g-fppa-left">14.8Â°</div>
+                  <div class="gauge-sub">Ref Median: 4.2Â° | Dev: +3.2 IQR</div>
+                </div>
+
+                <div class="gauge-item">
+                  <div class="gauge-title">Knee Flexion (Left)</div>
+                  <div class="gauge-value" id="g-flex-left">42.0Â°</div>
+                  <div class="gauge-sub">Ref Median: 48.5Â°</div>
+                </div>
+
+                <div class="gauge-item">
+                  <div class="gauge-title">Valgus Asymmetry LSI</div>
+                  <div class="gauge-value danger" id="g-lsi-valgus">65.5%</div>
+                  <div class="gauge-sub">Threshold: &lt; 15%</div>
+                </div>
+
+                <div class="gauge-item">
+                  <div class="gauge-title">Valgus Duration @ IC</div>
+                  <div class="gauge-value warning" id="g-valg-dur">0.22 s</div>
+                  <div class="gauge-sub">Sustained medial collapse</div>
+                </div>
+              </div>
+
+              <!-- Level 2 6-DOF Knee Kinematics Section -->
+              <div class="dof-section-box">
+                <div class="dof-header">
+                  <h4>Level 2 Advanced 6-DOF Knee Kinematics</h4>
+                  <span class="badge badge-outline" title="Requires depth camera (Intel RealSense, Azure Kinect) or stereo-calibrated pair. Not available on monocular video.">6-DOF Kinematics (Depth Required)</span>
+                </div>
+                
+                <div class="dof-grid">
+                  <div class="dof-card">
+                    <span class="dof-title">Ant-Post Translation (AP)</span>
+                    <div class="dof-val" id="g-6dof-ap">â€”</div>
+                    <span class="dof-sub" id="g-6dof-ap-reason">Anterior laxity estimate</span>
+                  </div>
+                  <div class="dof-card">
+                    <span class="dof-title">Med-Lat Translation (ML)</span>
+                    <div class="dof-val" id="g-6dof-ml">â€”</div>
+                    <span class="dof-sub" id="g-6dof-ml-reason">Lateral shift proxy</span>
+                  </div>
+                  <div class="dof-card">
+                    <span class="dof-title">Sup-Inf Translation (SI)</span>
+                    <div class="dof-val" id="g-6dof-si">â€”</div>
+                    <span class="dof-sub" id="g-6dof-si-reason">Joint compression</span>
+                  </div>
+                  <div class="dof-card">
+                    <span class="dof-title">Internal-External Rotation</span>
+                    <div class="dof-val" id="g-6dof-rot">â€”</div>
+                    <span class="dof-sub" id="g-6dof-rot-reason">Axial rotation angle</span>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 10px;" onclick="openParameters22Modal()">
+                  &#x1F4CA; Inspect 22 Biomechanical Parameters & Classifications
+                </button>
+              </div>
+
+              <div class="flags-summary-box">
+                <h4>Confirmed Risk Flags</h4>
+                <div id="player-risk-flags-list">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <div class="player-actions">
+                <button class="btn btn-primary" onclick="openClinicianDecisionModal()">Review & Generate Clinical Report &rarr;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      <!-- ATHLETE RECOVERY MODULE VIEW (v3) -->
+      </section><!-- /view-screening -->
+      <section id="view-recovery" class="view-section">
+        <div class="recovery-container">
+        <!-- TOP-LEVEL RECOVERY LIVE CAMERA PANEL -->
+          <div id="recovery-camera-panel" class="rec-card" style="margin-bottom:18px;">
+            <div class="rec-header-banner" style="align-items:center;">
+              <div>
+                <h3 style="margin:0;font-size:1.1rem;">Recovery Live Camera <span style="font-size:0.8rem;font-weight:400;color:var(--rec-text-muted);">(optional — for movement reference)</span></h3>
+                <p style="margin:4px 0 0;font-size:0.82rem;color:var(--rec-text-muted);">Gold skeleton overlay · Athlete 01 · MediaPipe Pose</p>
+              </div>
+              <span id="rec-cam-status" class="rec-phase-badge" style="font-size:0.78rem;">Camera stopped.</span>
+            </div>
+
+            <!-- Canvas + hidden video for camera feed -->
+            <div style="position:relative;background:#0a0f1a;border-radius:10px;overflow:hidden;margin:14px 0 10px;min-height:200px;display:flex;align-items:center;justify-content:center;">
+              <video id="rec-live-video" playsinline muted style="display:none;"></video>
+              <canvas id="rec-live-canvas" style="width:100%;max-height:380px;display:block;border-radius:10px;"></canvas>
+              <span id="rec-cam-label" style="display:none;"></span>
+              <div id="rec-cam-placeholder" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:rgba(255,255,255,0.3);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.806V15.19a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z"/></svg>
+                <p style="margin:8px 0 0;font-size:0.8rem;">Click Start Camera</p>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button id="btn-rec-cam-start" class="btn-rec-primary" style="min-width:120px;">&#9654; Start Camera</button>
+              <button id="btn-rec-cam-stop"  class="btn-rec-outline" style="min-width:80px;">&#9632; Stop</button>
+              <button id="btn-rec-cam-retry" class="btn-rec-outline" style="min-width:80px;">&#8635; Retry</button>
+            </div>
+
+            <!-- Clinical Notice -->
+            <div style="margin-top:12px;padding:10px 14px;background:rgba(251,191,36,0.08);border-left:3px solid #F59E0B;border-radius:4px;font-size:0.8rem;color:#92400E;">
+              &#9888;&#65039; <strong>Clinical Notice:</strong> Camera observations in this module are for exercise reference and movement guidance only. They do not constitute a clinical diagnosis, medical clearance, or modification of any treatment plan. All recovery plans remain subject to clinician review and approval.
+            </div>
+          </div>
+
+          <!-- Step 1: Medical Report Intake -->
+
+          <div id="rec-step-intake" class="rec-card">
+            <div class="rec-header-banner">
+              <div>
+                <h2 style="margin:0; font-size:1.4rem;">Athlete Recovery Plan Directives Intake</h2>
+                <p style="margin:4px 0 0 0; color:var(--rec-text-muted);">Paste doctor consultation notes or upload medical report text to automatically synthesize daily routines.</p>
+              </div>
+              <span class="rec-phase-badge">Clinical AI Parser</span>
+            </div>
+
+            <div class="form-group">
+              <label style="font-weight:600; margin-bottom:6px; display:block;">Select Athlete Profile</label>
+              <select id="recovery-athlete-select" class="form-control" style="max-width:360px;">
+                <option value="ath_demo1">Sarah Jenkins (Knee Rehab)</option>
+                <option value="ath_demo2">Marcus Vance (Ankle Sprain)</option>
+                <option value="ath_demo3">Elena Rostova (Hamstring Strain)</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-top:16px;">
+              <label style="font-weight:600; margin-bottom:6px; display:block;">Clinical Medical Report Text</label>
+              <textarea id="recovery-report-input" class="form-control" rows="10" placeholder="Paste medical report, diagnosis, medication dosages, and physical therapy recommendations here..."></textarea>
+            </div>
+
+            <div style="margin-top:20px; text-align:right;">
+              <button id="btn-analyze-report" class="btn-rec-primary">Analyze Medical Report â†’</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Confirmation & Editing Workspace -->
+          <div id="rec-step-confirm" class="rec-card" style="display:none;">
+            <div class="rec-header-banner">
+              <div>
+                <h2 style="margin:0; font-size:1.4rem;">Confirm & Edit Recovery Protocol</h2>
+                <p style="margin:4px 0 0 0; color:var(--rec-text-muted);">Review extracted directives, adjust per-item duration windows, and confirm everyday food targets.</p>
+              </div>
+              <span class="rec-phase-badge">Confirmation Workspace</span>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label style="font-weight:600;">Diagnosis Headline</label>
+                <input type="text" id="edit-diagnosis" class="form-control">
+              </div>
+              <div class="form-group">
+                <label style="font-weight:600;">Body Part</label>
+                <input type="text" id="edit-body-part" class="form-control">
+              </div>
+              <div class="form-group">
+                <label style="font-weight:600;">Recovery Phase</label>
+                <input type="text" id="edit-phase" class="form-control">
+              </div>
+              <div class="form-group">
+                <label style="font-weight:600;">Overall Recovery Duration (Days)</label>
+                <input type="number" id="edit-duration" class="form-control" value="30">
+              </div>
+              <div class="form-group">
+                <label style="font-weight:600;">Hydration Target (Glasses / Day)</label>
+                <input type="number" id="edit-hydration" class="form-control" value="8">
+              </div>
+            </div>
+
+            <h3 style="margin-top:24px; font-size:1.1rem; border-bottom:1px solid var(--rec-border); padding-bottom:8px;">Prescribed Medications & Duration Windows</h3>
+            <div id="edit-meds-container"></div>
+
+            <h3 style="margin-top:24px; font-size:1.1rem; border-bottom:1px solid var(--rec-border); padding-bottom:8px;">Nutritional Targets & Everyday Food Examples</h3>
+            <div id="edit-nutrition-container"></div>
+
+            <h3 style="margin-top:24px; font-size:1.1rem; border-bottom:1px solid var(--rec-border); padding-bottom:8px;">Physical Therapy Exercises & Form Cues</h3>
+            <div id="edit-exercises-container"></div>
+
+            <div style="margin-top:24px; text-align:right;">
+              <button id="btn-confirm-plan" class="btn-rec-primary">Confirm & Generate Pre-Persisted Plan â†’</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Daily Action Plan View -->
+          <div id="rec-step-daily" class="rec-card" style="display:none;">
+            <div class="rec-header-banner">
+              <div>
+                <h2 id="daily-banner-title" style="margin:0; font-size:1.3rem;">Athlete Recovery Action Plan</h2>
+                <p id="daily-progress-text" style="margin:4px 0 0 0; color:var(--rec-sage); font-weight:600; font-size:0.95rem;">Great job â€” hydration & meds are sorted for today!</p>
+              </div>
+              <span id="daily-banner-phase" class="rec-phase-badge">Acute Recovery</span>
+            </div>
+
+            <!-- Calming Progress Bar -->
+            <div style="background:var(--rec-surface-subtle); height:8px; border-radius:4px; overflow:hidden; margin-bottom:20px;">
+              <div id="daily-progress-bar-fill" style="background:var(--rec-sage); height:100%; width:0%; transition:width 0.3s ease;"></div>
+            </div>
+
+            <!-- Horizontal Day Strip Navigation -->
+            <h4 style="margin:0 0 8px 0; font-size:0.9rem; color:var(--rec-text-muted);">SELECT DAY VIEW:</h4>
+            <div id="horizontal-day-strip" class="day-strip-scroll"></div>
+
+            <!-- Hydration Action Card -->
+            <h3 style="margin-top:24px; font-size:1.1rem; border-bottom:1px solid var(--rec-border); padding-bottom:6px;">&#x1F4A7; Daily Hydration</h3>
+            <div id="hydration-card-body"></div>
+
+            <!-- Medication Checklist -->
+            <h3 style="margin-top:24px; font-size:1.1rem; border-bottom:1px solid var(--rec-border); padding-bottom:6px;">&#x1F489; Active Medications</h3>
+            <div id="medication-checklist-body"></div>
+
+            <!-- Nutrition Checklist -->
+            <h3 style="margin-top:24px; font-size:1.1rem; border-bottom:1px solid var(--rec-border); padding-bottom:6px;">&#x1F955; Active Nutrition & Food Sources</h3>
+            <div id="nutrition-checklist-body"></div>
+
+            <!-- 3-Stage Physical Therapy Exercises -->
+            <h3 style="margin-top:24px; font-size:1.1rem; border-bottom:1px solid var(--rec-border); padding-bottom:6px;">&#x1F3CB; Physical Therapy Exercises (Teach â€¢ Demo â€¢ Track)</h3>
+            <div id="exercise-workspace-body"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- CLINICIAN DECISION & REPORT MODAL -->
+  <div class="modal-overlay" id="decision-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Clinician Decision Support & Report Generation</h3>
+        <button class="btn-close" onclick="closeClinicianDecisionModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="disclaimer-banner">
+          <strong>NON-DIAGNOSTIC SCREENING AID:</strong> This report summarizes AI-assisted movement screening data intended for clinical decision support.
+        </div>
+
+        <div class="report-summary-box">
+          <h4>Session Biomechanical Summary</h4>
+          <p><strong>Session ID:</strong> <span id="rep-session-id">--</span></p>
+          <p><strong>Athlete:</strong> <span id="rep-athlete-name">--</span></p>
+          <p><strong>Overall Risk Classification:</strong> <span class="badge badge-danger" id="rep-overall-band">High</span></p>
+        </div>
+
+        <div class="form-group margin-top">
+          <label>Clinician Note Type</label>
+          <select id="note-type-select" class="form-control">
+            <option value="general">General Biomechanical Review</option>
+            <option value="clearance">Return-to-Sport Clearance Recommendation</option>
+            <option value="recommendations">Rehabilitation & Neuromuscular Retraining Focus</option>
+            <option value="risk_override">Risk Classification Clinical Override</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Clinician Findings & Recommendations</label>
+          <textarea id="note-content-input" class="form-control" rows="4" placeholder="Enter clinical observations, knee control cues, or clearance decision..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeClinicianDecisionModal()">Close</button>
+        <button class="btn btn-success" onclick="saveClinicianNote()">Save Note</button>
+        <button class="btn btn-primary" onclick="printSessionReport()">Print / Export PDF Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTER NEW ATHLETE MODAL -->
+  <div class="modal-overlay" id="new-athlete-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Register New Athlete</h3>
+        <button class="btn-close" onclick="closeNewAthleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Full Display Name</label>
+          <input type="text" id="new-ath-name" class="form-control" placeholder="e.g. Sarah Jenkins">
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Primary Sport</label>
+            <select id="new-ath-sport" class="form-control">
+              <option value="Basketball">Basketball</option>
+              <option value="Football">Football / Soccer</option>
+              <option value="Cricket">Cricket</option>
+              <option value="Volleyball">Volleyball</option>
+              <option value="Tennis">Tennis</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Dominant Leg</label>
+            <select id="new-ath-leg" class="form-control">
+              <option value="right">Right</option>
+              <option value="left">Left</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Team / School / Club</label>
+          <input type="text" id="new-ath-team" class="form-control" placeholder="e.g. Apex Sports Academy">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeNewAthleteModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitNewAthlete()">Save & Register</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 22 Biomechanical Parameters Inspector -->
+  <div id="modal-parameters-22" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog modal-lg" style="max-width: 960px; max-height: 85vh; overflow-y: auto;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0;">22 Biomechanical Parameters Registry</h3>
+          <p class="modal-subtitle" style="margin: 4px 0 0 0; font-size: 0.9rem; color: var(--color-text-muted);">
+            Clinical measurement provenance, method classifications (<code>measured</code>, <code>estimate</code>, <code>proxy</code>, <code>model-derived</code>), and Level 2 gating.
+          </p>
+        </div>
+        <button class="modal-close-btn" onclick="closeParameters22Modal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Parameter Name</th>
+                <th>Observed Value</th>
+                <th>Classification</th>
+                <th>Level</th>
+                <th>Clinical Convention & Formula</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-parameters-22">
+              <!-- Populated dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeParameters22Modal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="recovery.js"></script>
+</body>
+</html>
+

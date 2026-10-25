@@ -1,0 +1,325 @@
+/* Calming, Accessible Aesthetics for Athlete Recovery Module (v3) */
+:root {
+  --rec-bg: #EEE9DF;
+  --rec-surface: #FFFFFF;
+  --rec-surface-subtle: #F8F4EC;
+  --rec-text-dark: #2C3531;
+  --rec-text-muted: #626D68;
+  --rec-sage: #6E8F72;
+  --rec-sage-hover: #5A775E;
+  --rec-sage-light: #EBF1EC;
+  --rec-amber: #D9A860;
+  --rec-amber-light: #FBF4E8;
+  --rec-brick: #AE5B4D;
+  --rec-brick-light: #F8ECEB;
+  --rec-border: #D8D2C6;
+  --rec-radius: 12px;
+}
+
+.recovery-container {
+  background-color: var(--rec-bg);
+  min-height: calc(100vh - 80px);
+  padding: 24px;
+  color: var(--rec-text-dark);
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.rec-card {
+  background: var(--rec-surface);
+  border-radius: var(--rec-radius);
+  border: 1px solid var(--rec-border);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.rec-header-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--rec-border);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.rec-phase-badge {
+  background: var(--rec-sage-light);
+  color: var(--rec-sage);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Horizontal Day Strip */
+.day-strip-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 8px 4px 16px 4px;
+  scrollbar-width: thin;
+}
+
+.day-strip-node {
+  min-width: 64px;
+  height: 72px;
+  border-radius: 12px;
+  border: 1px solid var(--rec-border);
+  background: var(--rec-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.day-strip-node:hover {
+  transform: translateY(-2px);
+  border-color: var(--rec-sage);
+}
+
+.day-strip-node.active {
+  background: var(--rec-sage);
+  color: #fff;
+  border-color: var(--rec-sage);
+  box-shadow: 0 4px 12px rgba(110, 143, 114, 0.3);
+}
+
+.day-strip-node.future {
+  opacity: 0.55;
+  background: var(--rec-surface-subtle);
+}
+
+.day-strip-node.completed-day {
+  border-left: 4px solid var(--rec-sage);
+}
+
+.day-node-num {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.day-node-sub {
+  font-size: 0.72rem;
+  margin-top: 2px;
+}
+
+/* Checklist Cards & Actions */
+.rec-item-card {
+  background: var(--rec-surface-subtle);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(216, 210, 198, 0.6);
+  transition: background 0.2s ease;
+}
+
+.rec-item-card.completed {
+  background: var(--rec-sage-light);
+  border-color: var(--rec-sage);
+}
+
+.rec-checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--rec-sage);
+  cursor: pointer;
+}
+
+/* Expandable Food Toggle */
+.food-toggle-btn {
+  background: none;
+  border: 1px dashed var(--rec-sage);
+  color: var(--rec-sage);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.food-toggle-btn:hover {
+  background: var(--rec-sage-light);
+}
+
+.food-examples-drawer {
+  background: #FFF;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 8px;
+  border: 1px solid var(--rec-border);
+}
+
+.food-examples-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.9rem;
+  color: var(--rec-text-dark);
+}
+
+/* 3-Stage Exercise Flow Cards */
+.exercise-flow-card {
+  background: #FFF;
+  border-radius: 12px;
+  border: 1px solid var(--rec-border);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.ex-stage-nav {
+  display: flex;
+  background: var(--rec-surface-subtle);
+  border-bottom: 1px solid var(--rec-border);
+}
+
+.ex-stage-tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--rec-text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+
+.ex-stage-tab.active {
+  color: var(--rec-sage);
+  border-bottom-color: var(--rec-sage);
+  background: #FFF;
+}
+
+.ex-stage-content {
+  padding: 20px;
+}
+
+.ex-caution-box {
+  background: var(--rec-amber-light);
+  border-left: 4px solid var(--rec-amber);
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  margin-top: 10px;
+}
+
+.ex-cue-box {
+  background: var(--rec-sage-light);
+  border-left: 4px solid var(--rec-sage);
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  margin-top: 10px;
+}
+
+/* Media Demo Box */
+.ex-media-container {
+  width: 100%;
+  max-width: 480px;
+  height: 280px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--rec-surface-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ex-media-container img, .ex-media-container svg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Camera Tracking Canvas Container */
+.tracking-canvas-box {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  height: 320px;
+  margin: 0 auto;
+  background: #1E2421;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tracking-canvas-box video, .tracking-canvas-box canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Camera Reserve / Fallback Box */
+.camera-fallback-box {
+  background: var(--rec-brick-light);
+  border: 1px solid var(--rec-brick);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 14px;
+  text-align: center;
+}
+
+.btn-rec-primary {
+  background: var(--rec-sage);
+  color: #FFF;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-rec-primary:hover {
+  background: var(--rec-sage-hover);
+}
+
+.btn-rec-outline {
+  background: transparent;
+  color: var(--rec-sage);
+  border: 1.5px solid var(--rec-sage);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-rec-outline:hover {
+  background: var(--rec-sage-light);
+}
+
+/* Glass Counter Controls */
+.glass-counter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.glass-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--rec-sage);
+  background: #FFF;
+  color: var(--rec-sage);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glass-btn:hover {
+  background: var(--rec-sage-light);
+}

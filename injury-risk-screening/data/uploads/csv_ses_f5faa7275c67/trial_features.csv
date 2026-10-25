@@ -1,0 +1,33 @@
+session_id,tracker_id,jersey_number,display_name,tracked_frames,risk_score,risk_band,main_finding
+ses_f5faa7275c67,1,7,Player #7,205,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,2,7,Player #7,161,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,3,7,Player #7,121,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,4,7,Player #7,50,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,5,7,Player #7,94,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,6,7,Player #7,7,45,HIGH,Elevated Dynamic Knee Valgus Proxy
+ses_f5faa7275c67,7,7,Player #7,76,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,8,7,Player #7,28,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,9,23,Player #23,50,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,10,7,Player #7,31,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,11,23,Player #23,72,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,12,7,Player #7,33,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,13,23,Player #23,36,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,14,7,Player #7,7,45,HIGH,Elevated Dynamic Knee Valgus Proxy
+ses_f5faa7275c67,15,N/A,Player 015,23,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,16,7,Player #7,11,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,17,7,Player #7,13,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,18,7,Player #7,7,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,19,N/A,Player 019,3,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,20,7,Player #7,5,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,21,7,Player #7,5,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,22,7,Player #7,7,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,23,7,Player #7,3,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,24,7,Player #7,2,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,25,7,Player #7,21,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,26,N/A,Player 026,1,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,27,7,Player #7,26,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,28,7,Player #7,5,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,29,7,Player #7,3,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,30,N/A,Player 030,3,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,31,N/A,Player 031,2,88,LOW,Normal Movement Mechanics
+ses_f5faa7275c67,32,N/A,Player 032,6,88,LOW,Normal Movement Mechanics

@@ -1,0 +1,64 @@
+======================================================================
+DRIFTGUARD - MEDIAPIPE BLAZEPOSE 3D MODEL ARCHITECTURE SUMMARY
+======================================================================
+
+1. MODEL BUNDLE FILE
+   Source Path: models/pose_landmarker_full.task
+   File Format: Google MediaPipe Task Bundle (ZIP container holding TFLite neural network graphs)
+
+2. EXTRACTED TFLITE NEURAL NETWORK GRAPHS
+   a) pose_detector.tflite
+      - Purpose: Bounding-box detection of human body candidates in RGB frames.
+      - Input Tensor: 1 x 224 x 224 x 3 (Normalized RGB image)
+      - Output Tensors: Bounding box coordinates (xmin, ymin, width, height) + Keypoint score predictions.
+
+   b) pose_landmarks_detector.tflite
+      - Purpose: 3D Human Pose Landmark regression model (BlazePose GHUM 3D architecture).
+      - Input Tensor: 1 x 256 x 256 x 3 (Cropped RGB torso/person tensor)
+      - Output Tensors:
+        * Tensor 0: 33 3D Joint Landmarks (x, y, z normalized image coordinates) + visibility scores
+        * Tensor 1: 33 3D World Landmarks (x_world, y_world, z_world metric coordinates in meters)
+        * Tensor 2: Pose presence confidence score (0.0 to 1.0)
+        * Tensor 3: Segmented body mask heatmap
+
+3. 33 BODY LANDMARK TOPOLOGY INDEX (0 to 32)
+   - 0: NOSE
+   - 1: LEFT_EYE_INNER
+   - 2: LEFT_EYE
+   - 3: LEFT_EYE_OUTER
+   - 4: RIGHT_EYE_INNER
+   - 5: RIGHT_EYE
+   - 6: RIGHT_EYE_OUTER
+   - 7: LEFT_EAR
+   - 8: RIGHT_EAR
+   - 9: MOUTH_LEFT
+   - 10: MOUTH_RIGHT
+   - 11: LEFT_SHOULDER
+   - 12: RIGHT_SHOULDER
+   - 13: LEFT_ELBOW
+   - 14: RIGHT_ELBOW
+   - 15: LEFT_WRIST
+   - 16: RIGHT_WRIST
+   - 17: LEFT_PINKY
+   - 18: RIGHT_PINKY
+   - 19: LEFT_INDEX
+   - 20: RIGHT_INDEX
+   - 21: LEFT_THUMB
+   - 22: RIGHT_THUMB
+   - 23: LEFT_HIP
+   - 24: RIGHT_HIP
+   - 25: LEFT_KNEE
+   - 26: RIGHT_KNEE
+   - 27: LEFT_ANKLE
+   - 28: RIGHT_ANKLE
+   - 29: LEFT_HEEL
+   - 30: RIGHT_HEEL
+   - 31: LEFT_FOOT_INDEX
+   - 32: RIGHT_FOOT_INDEX
+
+======================================================================
+HOW TO OPEN IN NETRON MODEL VISUALIZER:
+1. Open https://netron.app in your browser.
+2. Select 'Open Model...' and pick: models/pose_landmarks_detector.tflite
+   (Netron natively opens .tflite files!)
+======================================================================
